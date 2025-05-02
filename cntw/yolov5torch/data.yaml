@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 6
+names: ['Corroded-Bolt', 'Corroded-Nut', 'Corroded-Nut-and-Bolt', 'Non-Corroded-Nut-and-Bolt', 'Non-corroded Nut', 'Non-corroded-Bolts']
+
+roboflow:
+  workspace: meee-aegk9
+  project: nut-and-bolt-corrosion
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/meee-aegk9/nut-and-bolt-corrosion/dataset/2

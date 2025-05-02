@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inspection and Data Analyser</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    header {
+      background-color: #003366;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      position: relative;
+    }
+    nav {
+      background-color: #0055aa;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 8px 15px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    nav a:hover {
+      background-color: #0077cc;
+    }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.08);
+      display: none;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+    #login-container {
+      display: block;
+      max-width: 400px;
+      background-color: white;
+    }
+    input[type="text"], input[type="password"], button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+    .video-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .video-frame {
+      width: 640px;
+      height: 360px;
+      background-color: #333;
+      border: 4px solid #0077cc;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    #live-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .count-boxes {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+    }
+    .count-box {
+      background-color: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+      width: 30%;
+      text-align: center;
+      box-shadow: 0 0 5px rgba(0,0,0,0.05);
+    }
+    .count-box h3 {
+      margin: 0 0 10px 0;
+      color: #003366;
+    }
+    .count {
+      font-size: 24px;
+      font-weight: bold;
+      color: #0055aa;
+    }
+    canvas {
+      max-width: 100%;
+      margin-top: 30px;
+    }
+    h2, h3 {
+      color: #003366;
+    }
+    p, li {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    ul, ol {
+      margin-left: 20px;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .logout-btn {
+      position: absolute;
+      right: 20px;
+      background-color: #cc0000;
+      padding: 8px 15px;
+      border-radius: 5px;
+    }
+    .logout-btn:hover {
+      background-color: #aa0000;
+    }
+    .time-display {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      font-size: 14px;
+    }
+    /* Detection overlay styles */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    Inspection and Data Analyser
+    <div id="currentTime" class="time-display"></div>
+  </header>
+
+  <nav id="nav" style="display: none;">
+    <a onclick="showPage('home')">Home</a>
+    <a onclick="showPage('inspection')">Inspection Window</a>
+    <a onclick="showPage('data')">Data Analyser</a>
+    <a class="logout-btn" onclick="logout()">Logout</a>
+  </nav>
+
+  <div class="container" id="login-container">
+    <h2>Admin Login</h2>
+    <input type="text" id="username" placeholder="Enter Name" required>
+    <input type="password" id="password" placeholder="Enter Password" required>
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div class="container" id="home-container">
+    <h2>Welcome to the Inspection and Data Analyser System</h2>
+    <h3>🔍 Screw Detection Overview</h3>
+    <p> Our Inspection and Data Analyser system utilizes a live video feed to monitor and detect screws in real-time. By analyzing the video frames, the system counts the number of screws passing through, distinguishes between good quality screws and defective ones, and maintains a live record of the inspection process. This assists in ensuring high-quality standards and minimizing defective products reaching the final assembly line. </p>
+    <h3>⚙️ Process Description</h3>
+    <ol>
+      <li>Video Capture: The system captures live video using a camera positioned over the inspection area.</li>
+      <li>Screw Detection: Objects resembling screws are detected using advanced processing techniques.</li>
+      <li>Classification: Each detected screw is classified as either 'Good' or 'Defective' based on predefined parameters.</li>
+      <li>Data Update: Counts for Total, Good, and Defective screws are updated in real-time on the dashboard.</li>
+      <li>Graphical Representation: Analysis of the inspection data is visualized using a bar graph in the Data Analyser section.</li>
+    </ol>
+    <h3>🎯 Objectives</h3>
+    <ul>
+      <li>Ensure efficient and real-time monitoring of screws during production.</li>
+      <li>Automatically detect and classify screws without manual intervention.</li>
+      <li>Reduce the chances of defective products reaching the next stages.</li>
+      <li>Provide intuitive graphical analytics for quick performance evaluation.</li>
+      <li>Maintain a historical record of inspections for quality audits.</li>
+    </ul>
+  </div>
+
+  <div class="container" id="inspection-container">
+    <h2>Inspection Window</h2>
+    <div class="video-container">
+      <div class="video-frame" id="video">
+        <video id="live-video" autoplay playsinline></video>
+        <canvas id="overlay" class="overlay"></canvas>
+      </div>
+      <div class="count-boxes">
+        <div class="count-box">
+          <h3>Total Screws</h3>
+          <div class="count" id="total-count">0</div>
+        </div>
+        <div class="count-box">
+          <h3>Good Screws</h3>
+          <div class="count" id="good-count">0</div>
+        </div>
+        <div class="count-box">
+          <h3>Defective Screws</h3>
+          <div class="count" id="bad-count">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" id="data-container">
+    <h2>Data Analyser</h2>
+    <p>This graph shows the analysis of screws processed during inspection:</p>
+    <canvas id="screwChart" width="600" height="300"></canvas>
+  </div>
+
+  <script>
+    let total = 0, good = 0, bad = 0;
+    let inspectionInterval;
+    let screwChart;
+    let videoStream;
+    let detectionInterval;
+    const overlay = document.getElementById('overlay');
+    const overlayCtx = overlay.getContext('2d');
+
+    function login() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const correctUsername = "admin";
+      const correctPassword = "1234";
+
+      if (username === correctUsername && password === correctPassword) {
+        document.getElementById("login-container").style.display = "none";
+        document.getElementById("home-container").style.display = "block";
+        document.getElementById("nav").style.display = "flex";
+      } else {
+        alert("Incorrect username or password.");
+      }
+    }
+
+    function showPage(page) {
+      ["home", "data", "inspection"].forEach(p => {
+        document.getElementById(`${p}-container`).style.display = "none";
+      });
+
+      if (page === "inspection") {
+        document.getElementById("inspection-container").style.display = "block";
+        startCamera();
+        startDetection();
+      } else {
+        stopDetection();
+        stopCamera();
+        document.getElementById(`${page}-container`).style.display = "block";
+
+        if (page === "data") {
+          updateChart();
+        }
+      }
+    }
+
+    async function startCamera() {
+      try {
+        const video = document.getElementById('live-video');
+        videoStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 640 },
+            height: { ideal: 360 },
+            facingMode: 'environment'
+          }
+        });
+        video.srcObject = videoStream;
+        
+        // Set overlay dimensions to match video
+        video.onloadedmetadata = () => {
+          overlay.width = video.videoWidth;
+          overlay.height = video.videoHeight;
+        };
+      } catch (err) {
+        console.error("Error accessing camera:", err);
+        document.getElementById('video').innerHTML = 
+          '<p style="color: white; text-align: center; line-height: 360px;">Camera access denied or not available</p>';
+      }
+    }
+
+    function stopCamera() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+      }
+    }
+
+    function logout() {
+      stopDetection();
+      stopCamera();
+      total = good = bad = 0;
+      updateCounts();
+      document.getElementById("login-container").style.display = "block";
+      ["home", "data", "inspection"].forEach(p => {
+        document.getElementById(`${p}-container`).style.display = "none";
+      });
+      document.getElementById("nav").style.display = "none";
+    }
+
+    function updateCounts() {
+      document.getElementById("total-count").innerText = total;
+      document.getElementById("good-count").innerText = good;
+      document.getElementById("bad-count").innerText = bad;
+    }
+
+    function startDetection() {
+      detectionInterval = setInterval(captureFrame, 100);
+    }
+
+    function stopDetection() {
+      clearInterval(detectionInterval);
+    }
+
+    async function captureFrame() {
+      const video = document.getElementById('live-video');
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        overlayCtx.drawImage(video, 0, 0, overlay.width, overlay.height);
+        
+        // Simulate detection (replace with actual API call)
+        simulateDetection();
+      }
+    }
+
+    function simulateDetection() {
+      // This is a simulation - replace with actual API call to your detection service
+      overlayCtx.clearRect(0, 0, overlay.width, overlay.height);
+      
+      // Randomly generate some detection results for demo purposes
+      const newScrews = Math.floor(Math.random() * 3);
+      const newBad = Math.floor(Math.random() * newScrews);
+      const newGood = newScrews - newBad;
+
+      total += newScrews;
+      good += newGood;
+      bad += newBad;
+
+      updateCounts();
+
+      // Draw bounding boxes for demo
+      for (let i = 0; i < newScrews; i++) {
+        const x = Math.random() * (overlay.width - 50);
+        const y = Math.random() * (overlay.height - 50);
+        const width = 30 + Math.random() * 20;
+        const height = 15 + Math.random() * 10;
+        const isGood = i < newGood;
+        
+        overlayCtx.beginPath();
+        overlayCtx.rect(x, y, width, height);
+        overlayCtx.lineWidth = 2;
+        overlayCtx.strokeStyle = isGood ? 'green' : 'red';
+        overlayCtx.fillStyle = isGood ? 'green' : 'red';
+        overlayCtx.stroke();
+        overlayCtx.fillText(isGood ? 'Good' : 'Bad', x, y - 5);
+      }
+    }
+
+    function updateChart() {
+      const ctx = document.getElementById('screwChart').getContext('2d');
+
+      if (screwChart) screwChart.destroy();
+
+      screwChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Total Screws', 'Good Screws', 'Defective Screws'],
+          datasets: [{
+            label: 'Screw Count',
+            data: [total, good, bad],
+            backgroundColor: ['#0055aa', '#22bb33', '#cc0000']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: {
+              display: true,
+              text: 'Screw Inspection Summary'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 }
+            }
+          }
+        }
+      });
+    }
+
+    function showTime() {
+      document.getElementById('currentTime').innerHTML = new Date().toUTCString();
+    }
+    showTime();
+    setInterval(showTime, 1000);
+
+    // For actual implementation, replace simulateDetection() with:
+    /*
+    async function sendFrameToServer() {
+      const video = document.getElementById('live-video');
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      canvas.toBlob(async (blob) => {
+        const formData = new FormData();
+        formData.append('image', blob);
+
+        try {
+          const response = await fetch('http://your-server-address/predict', {
+            method: 'POST',
+            body: formData
+          });
+          const predictions = await response.json();
+          processPredictions(predictions);
+        } catch (error) {
+          console.error('Error sending frame:', error);
+        }
+      });
+    }
+
+    function processPredictions(predictions) {
+      overlayCtx.clearRect(0, 0, overlay.width, overlay.height);
+      
+      total = predictions.length;
+      good = predictions.filter(p => p.name === 'good_screw').length;
+      bad = total - good;
+      
+      updateCounts();
+      
+      predictions.forEach(prediction => {
+        const x = prediction.xmin;
+        const y = prediction.ymin;
+        const width = prediction.xmax - x;
+        const height = prediction.ymax - y;
+        const isGood = prediction.name === 'good_screw';
+        
+        overlayCtx.beginPath();
+        overlayCtx.rect(x, y, width, height);
+        overlayCtx.lineWidth = 2;
+        overlayCtx.strokeStyle = isGood ? 'green' : 'red';
+        overlayCtx.fillStyle = isGood ? 'green' : 'red';
+        overlayCtx.stroke();
+        overlayCtx.fillText(isGood ? 'Good' : 'Bad', x, y - 5);
+      });
+    }
+    */
+  </script>
+</body>
+</html>
